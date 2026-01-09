@@ -13,7 +13,6 @@ const STATUS_TO_DISPLAY_TYPE: Record<number, DisplayType> = {
   401: 'page',
   403: 'modal',
   404: 'inline',
-  429: 'toast',
   500: 'toast'
 };
 
@@ -42,14 +41,27 @@ export class HttpExceptionFilter implements ExceptionFilter {
       ? exceptionResponse
       : this.extractMessage(exceptionResponse, exception.message);
 
-    const errorResponse: ErrorResponse = {
+    // Extract custom fields from response if present (e.g., errorCode, email for EMAIL_NOT_VERIFIED)
+    const customFields = typeof exceptionResponse === 'object' && exceptionResponse !== null
+      ? exceptionResponse as Record<string, unknown>
+      : {};
+
+    // Build base response with standard fields
+    const baseResponse: ErrorResponse = {
       statusCode: status,
       message: Array.isArray(message) ? message.join(', ') : message,
-      errorCode: this.getErrorCode(status),
+      // Preserve custom errorCode if present, otherwise use default based on status
+      errorCode: (customFields.errorCode as string) || this.getErrorCode(status),
       displayType: STATUS_TO_DISPLAY_TYPE[status] || 'toast',
       details: typeof exceptionResponse === 'object' && exceptionResponse !== null
         ? this.extractDetails(exceptionResponse)
         : undefined
+    };
+
+    // Merge custom fields (like 'email' for EMAIL_NOT_VERIFIED) to top level
+    const errorResponse = {
+      ...baseResponse,
+      ...this.extractCustomFields(customFields)
     };
 
     return response.status(status).json(errorResponse);
@@ -87,14 +99,26 @@ export class HttpExceptionFilter implements ExceptionFilter {
       403: 'FORBIDDEN',
       404: 'NOT_FOUND',
       409: 'CONFLICT',
-      422: 'UNPROCESSABLE_ENTITY',
-      429: 'RATE_LIMIT_EXCEEDED',
-      500: 'INTERNAL_SERVER_ERROR',
-      502: 'BAD_GATEWAY',
-      503: 'SERVICE_UNAVAILABLE',
-      504: 'GATEWAY_TIMEOUT'
+      500: 'INTERNAL_SERVER_ERROR'
     };
 
     return errorCodes[status] || 'UNKNOWN_ERROR';
+  }
+
+  /**
+   * Extract custom fields from exception response, excluding standard fields.
+   * This allows custom fields like 'email' for EMAIL_NOT_VERIFIED to be passed through.
+   */
+  private extractCustomFields(response: Record<string, unknown>): Record<string, unknown> {
+    const standardFields = ['message', 'error', 'statusCode', 'errorCode'];
+    const customFields: Record<string, unknown> = {};
+
+    for (const [key, value] of Object.entries(response)) {
+      if (!standardFields.includes(key) && value !== undefined) {
+        customFields[key] = value;
+      }
+    }
+
+    return customFields;
   }
 }

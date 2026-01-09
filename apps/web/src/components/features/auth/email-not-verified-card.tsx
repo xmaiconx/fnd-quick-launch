@@ -8,20 +8,39 @@ import { LoadingButton } from "@/components/ui/loading-button"
 import { api } from "@/lib/api"
 import { useAuthStore } from "@/stores/auth-store"
 
-export function EmailNotVerifiedCard() {
+interface EmailNotVerifiedCardProps {
+  email?: string
+}
+
+export function EmailNotVerifiedCard({ email }: EmailNotVerifiedCardProps) {
   const user = useAuthStore((state) => state.user)
   const [resending, setResending] = React.useState(false)
+  const [cooldown, setCooldown] = React.useState(0)
+
+  // Use email prop if available, fallback to user email
+  const userEmail = email || user?.email
+
+  // Cooldown timer
+  React.useEffect(() => {
+    if (cooldown > 0) {
+      const timer = setInterval(() => {
+        setCooldown((prev) => prev - 1)
+      }, 1000)
+      return () => clearInterval(timer)
+    }
+  }, [cooldown])
 
   const handleResend = async () => {
-    if (!user?.email) {
+    if (!userEmail) {
       toast.error("Email não encontrado. Faça login novamente.")
       return
     }
 
     try {
       setResending(true)
-      await api.post("/auth/resend-verification", { email: user.email })
+      await api.post("/auth/resend-verification", { email: userEmail })
       toast.success("Email de verificação enviado com sucesso!")
+      setCooldown(60) // Start 60 second cooldown
     } catch (err: any) {
       const message =
         err.response?.data?.message ||
@@ -54,7 +73,7 @@ export function EmailNotVerifiedCard() {
         </h3>
         <p className="text-sm text-muted-foreground">
           Enviamos um link de verificação para{" "}
-          <span className="font-medium text-foreground">{user?.email}</span>.
+          <span className="font-medium text-foreground">{userEmail}</span>.
           Clique no link para ativar sua conta.
         </p>
         <p className="text-xs text-muted-foreground">
@@ -67,10 +86,13 @@ export function EmailNotVerifiedCard() {
         <LoadingButton
           onClick={handleResend}
           loading={resending}
+          disabled={cooldown > 0}
           className="w-full h-11"
           variant="outline"
         >
-          Reenviar email de verificação
+          {cooldown > 0
+            ? `Aguarde ${cooldown}s para reenviar`
+            : "Reenviar email de verificação"}
         </LoadingButton>
         <a
           href="/login"

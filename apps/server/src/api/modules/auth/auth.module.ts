@@ -21,14 +21,12 @@ import { ResetPasswordCommandHandler } from './commands/ResetPasswordCommand';
 import { VerifyEmailCommandHandler } from './commands/VerifyEmailCommand';
 import { ResendVerificationCommandHandler } from './commands/ResendVerificationCommand';
 import { UpdateProfileCommandHandler } from './commands/UpdateProfileCommand';
-import { RequestEmailChangeCommandHandler } from './commands/RequestEmailChangeCommand';
-import { ConfirmEmailChangeCommandHandler } from './commands/ConfirmEmailChangeCommand';
 import { AccountCreatedEventHandler } from './events/handlers/AccountCreatedEventHandler';
 import { LoginSuccessEventHandler } from './events/handlers/LoginSuccessEventHandler';
 import { LoginFailureEventHandler } from './events/handlers/LoginFailureEventHandler';
 import { PasswordResetRequestedEventHandler } from './events/handlers/PasswordResetRequestedEventHandler';
 import { PasswordChangedEventHandler } from './events/handlers/PasswordChangedEventHandler';
-import { EmailChangeRequestedEventHandler } from './events/handlers/EmailChangeRequestedEventHandler';
+import { VerificationEmailResentEventHandler } from './events/handlers/VerificationEmailResentEventHandler';
 
 @Module({
   imports: [
@@ -68,8 +66,6 @@ import { EmailChangeRequestedEventHandler } from './events/handlers/EmailChangeR
     VerifyEmailCommandHandler,
     ResendVerificationCommandHandler,
     UpdateProfileCommandHandler,
-    RequestEmailChangeCommandHandler,
-    ConfirmEmailChangeCommandHandler,
 
     // Event Handlers
     AccountCreatedEventHandler,
@@ -77,7 +73,7 @@ import { EmailChangeRequestedEventHandler } from './events/handlers/EmailChangeR
     LoginFailureEventHandler,
     PasswordResetRequestedEventHandler,
     PasswordChangedEventHandler,
-    EmailChangeRequestedEventHandler,
+    VerificationEmailResentEventHandler,
   ],
   exports: [
     // Export strategies and guards for use in other modules (e.g., ManagerModule)

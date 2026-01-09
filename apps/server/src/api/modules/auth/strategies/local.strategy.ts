@@ -84,6 +84,7 @@ export class LocalStrategy extends PassportStrategy(Strategy, 'local') {
       throw new UnauthorizedException({
         message: 'Email não verificado. Por favor, verifique seu email antes de fazer login.',
         errorCode: 'EMAIL_NOT_VERIFIED',
+        email: user.email,
       });
     }
 

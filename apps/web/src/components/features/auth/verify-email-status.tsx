@@ -7,6 +7,8 @@ import { toast } from "@/lib/toast"
 import { CheckCircle2, Loader2, XCircle } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { LoadingButton } from "@/components/ui/loading-button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { api } from "@/lib/api"
 
 type VerificationStatus = "loading" | "success" | "error"
@@ -19,6 +21,8 @@ export function VerifyEmailStatus() {
   const [status, setStatus] = React.useState<VerificationStatus>("loading")
   const [error, setError] = React.useState<string | null>(null)
   const [resending, setResending] = React.useState(false)
+  const [email, setEmail] = React.useState("")
+  const [cooldown, setCooldown] = React.useState(0)
   const hasVerified = React.useRef(false)
 
   // Auto-verify on mount
@@ -56,14 +60,27 @@ export function VerifyEmailStatus() {
     verifyEmail()
   }, [token, navigate])
 
+  // Cooldown timer
+  React.useEffect(() => {
+    if (cooldown > 0) {
+      const timer = setInterval(() => {
+        setCooldown((prev) => prev - 1)
+      }, 1000)
+      return () => clearInterval(timer)
+    }
+  }, [cooldown])
+
   const handleResend = async () => {
-    if (!token) return
+    if (!email || !email.includes("@")) {
+      toast.error("Por favor, insira um email válido")
+      return
+    }
 
     try {
       setResending(true)
-      // Extract email from error or ask user to go to login
-      await api.post("/auth/resend-verification", { email: "" })
+      await api.post("/auth/resend-verification", { email })
       toast.success("Email de verificação reenviado!")
+      setCooldown(60) // Start 60 second cooldown
     } catch (err: any) {
       const message =
         err.response?.data?.message ||
@@ -153,15 +170,36 @@ export function VerifyEmailStatus() {
         </AlertDescription>
       </Alert>
 
-      <div className="space-y-2">
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="email" className="text-sm font-medium">
+            Email
+          </Label>
+          <Input
+            id="email"
+            type="email"
+            placeholder="seu@email.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="h-11 text-base"
+          />
+          <p className="text-xs text-muted-foreground">
+            Digite seu email para receber um novo link de verificação
+          </p>
+        </div>
+
         <LoadingButton
           onClick={handleResend}
           loading={resending}
+          disabled={cooldown > 0 || !email}
           className="w-full h-11"
           variant="outline"
         >
-          Reenviar email de verificação
+          {cooldown > 0
+            ? `Aguarde ${cooldown}s para reenviar`
+            : "Reenviar email de verificação"}
         </LoadingButton>
+
         <a
           href="/login"
           className="block text-center text-sm text-muted-foreground hover:text-foreground"

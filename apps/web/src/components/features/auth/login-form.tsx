@@ -49,7 +49,9 @@ export function LoginForm() {
     } catch (err: any) {
       // Check if it's an email not verified error
       if (err.errorCode === "EMAIL_NOT_VERIFIED") {
-        navigate("/email-not-verified")
+        navigate("/email-not-verified", {
+          state: { email: err.email }
+        })
         return
       }
 

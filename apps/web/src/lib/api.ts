@@ -134,6 +134,7 @@ api.interceptors.response.use(
     // Check if this is an unverified email error - don't redirect, let component handle it
     if (errorCode === 'EMAIL_NOT_VERIFIED') {
       error.errorCode = errorCode
+      error.email = errorData?.email
       error.message = errorData?.message || 'Email não verificado'
       return Promise.reject(error)
     }
