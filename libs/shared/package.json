@@ -8,6 +8,9 @@
     "build": "tsc --build",
     "clean": "rimraf dist tsconfig.tsbuildinfo"
   },
+  "dependencies": {
+    "@fnd/domain": "*"
+  },
   "devDependencies": {
     "typescript": "^5.0.0"
   }

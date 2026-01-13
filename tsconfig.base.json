@@ -13,10 +13,6 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "moduleResolution": "node",
-    "baseUrl": ".",
-    "paths": {
-      "@fnd/*": ["libs/*/src"]
-    }
+    "moduleResolution": "node"
   }
 }
