@@ -11,6 +11,7 @@ import { WorkersModule } from '../workers/workers.module';
 import { AppController } from './app.controller';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ResponseInterceptor } from './interceptors/response.interceptor';
+import { TenantContextInterceptor } from './interceptors/tenant-context.interceptor';
 
 /**
  * App Module - Main Application Module
@@ -56,6 +57,10 @@ if (shouldLoadWorkers) {
   imports,
   controllers: [AppController],
   providers: [
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: TenantContextInterceptor,
+    },
     {
       provide: APP_INTERCEPTOR,
       useClass: ResponseInterceptor,
