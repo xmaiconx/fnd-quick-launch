@@ -116,6 +116,42 @@ Reference: `apps/server/src/api/interceptors/response.interceptor.ts`
 
 ---
 
+## Frontend (Admin)
+
+### Pages
+| Route | Page Component | Purpose |
+|-------|----------------|---------|
+| /settings | SettingsPage | Página de configurações do sistema (adicionar seção RLS) |
+
+### Components
+| Component | Location | Purpose |
+|-----------|----------|---------|
+| RlsToggleCard | `components/features/settings/rls-toggle-card.tsx` | Card com switch toggle + status info |
+
+### Hooks
+| Hook | Type | Purpose |
+|------|------|---------|
+| useRlsStatus | TanStack Query | GET /manager/rls/status |
+| useToggleRls | TanStack Mutation | POST /manager/rls/toggle |
+
+**Location:** `apps/admin/src/hooks/use-rls.ts`
+
+### Types
+| Type | Fields | Source |
+|------|--------|--------|
+| RlsStatus | `enabled: boolean, updatedAt: string, updatedBy: string` | RlsStatusResponseDto |
+
+### UI Description
+- Card com título "Row Level Security"
+- Switch toggle (enabled/disabled)
+- Badge de status (Ativo/Desativado)
+- Texto: "Última alteração: {updatedAt} por {updatedBy}"
+- Alert warning quando desabilitado: "RLS desabilitado expõe dados entre tenants"
+
+Reference: `apps/admin/src/pages/plans.tsx`, `apps/admin/src/hooks/use-plans.ts`
+
+---
+
 ## Main Flow
 
 1. **Request autenticada** → JWT extraído pelo Passport
@@ -157,6 +193,12 @@ Reference: `apps/server/src/api/interceptors/response.interceptor.ts`
    - [ ] RlsStatusResponseDto
    - [ ] manager.controller endpoints
 
+6. **Frontend - Admin**
+   - [ ] Types: RlsStatus
+   - [ ] Hook: use-rls.ts (useRlsStatus, useToggleRls)
+   - [ ] Component: RlsToggleCard
+   - [ ] Integrar em SettingsPage (ou criar se não existir)
+
 ---
 
 ## Quick Reference
@@ -169,3 +211,5 @@ Reference: `apps/server/src/api/interceptors/response.interceptor.ts`
 | Repository | `libs/database/src/repositories/UserRepository.ts` |
 | Worker | `apps/server/src/workers/audit.worker.ts` |
 | Manager Controller | `apps/server/src/api/modules/manager/manager.controller.ts` |
+| Admin Page | `apps/admin/src/pages/plans.tsx` (padrão de página) |
+| Admin Hook | `apps/admin/src/hooks/use-plans.ts` (padrão de hook) |
