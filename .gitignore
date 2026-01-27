@@ -160,7 +160,9 @@ build-matrix.json
 
 nul
 
-docs/*
+# Documentation - local only, not tracked
+docs/
+
 .vscode/*
 .fnd/*
 .claude/*
