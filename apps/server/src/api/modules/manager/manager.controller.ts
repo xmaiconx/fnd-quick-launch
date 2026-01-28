@@ -12,6 +12,7 @@ import {
   HttpCode,
   HttpStatus,
   Inject,
+  BadRequestException,
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { SuperAdminGuard } from '../../guards/super-admin.guard';
@@ -481,7 +482,16 @@ export class ManagerController {
     @Request() req: any,
   ): Promise<RlsStatusResponseDto> {
     const userEmail = req.user?.email || 'unknown';
-    this.rlsManager.setEnabled(dto.enabled, userEmail);
+
+    // setEnabled now validates internally when enabling RLS
+    try {
+      await this.rlsManager.setEnabled(dto.enabled, userEmail);
+    } catch (error) {
+      throw new BadRequestException(
+        error instanceof Error ? error.message : 'Failed to toggle RLS'
+      );
+    }
+
     const status = this.rlsManager.getStatus();
     return {
       enabled: status.enabled,

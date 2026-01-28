@@ -207,7 +207,8 @@ const RLS_MANAGER_TOKEN = 'IRlsManager';
     },
     {
       provide: RLS_MANAGER_TOKEN,
-      useClass: RlsManager,
+      useFactory: (db) => new RlsManager(db),
+      inject: [DATABASE_TOKEN],
     },
     StartupLoggerService,
   ],
