@@ -91,7 +91,6 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 - [x] Idempotente: múltiplas execuções sem erro
 
 ---
-
 #### [2026-01-23] Optimize dev startup performance
 
 **Resumo:** Otimizações de configuração para acelerar o tempo de inicialização do servidor em desenvolvimento. Habilitado lazy compilation no SWC, inline sourcemaps, reduzido delay do nodemon, e expandidos ignore patterns.
