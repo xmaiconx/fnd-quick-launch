@@ -38,12 +38,12 @@ export function ActivityLog({ userId, limit = 50 }: ActivityLogProps) {
     )
   }
 
-  // Map AuditLog to Activity
+  // Convert AuditLog to Activity format
   const activities = auditLogs.map((log) => ({
     id: log.id,
     action: log.action,
     timestamp: log.createdAt,
-    details: log.metadata,
+    details: log.metadata ?? {},
     userName: log.user?.fullName,
     userEmail: log.user?.email,
   }))
