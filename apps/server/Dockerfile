@@ -21,6 +21,7 @@ COPY apps/server/package*.json ./apps/server/
 COPY libs/domain/package*.json ./libs/domain/
 COPY libs/contracts/package*.json ./libs/contracts/
 COPY libs/database/package*.json ./libs/database/
+COPY libs/shared/package*.json ./libs/shared/
 
 # Install all dependencies (including devDependencies for build)
 RUN npm ci --legacy-peer-deps
@@ -37,6 +38,7 @@ COPY tsconfig.base.json ./
 COPY libs/domain/tsconfig.json ./libs/domain/
 COPY libs/contracts/tsconfig.json ./libs/contracts/
 COPY libs/database/tsconfig.json ./libs/database/
+COPY libs/shared/tsconfig.json ./libs/shared/
 COPY apps/server/tsconfig.json ./apps/server/
 
 # Copy source code
@@ -45,19 +47,23 @@ COPY libs/contracts/src ./libs/contracts/src
 COPY libs/database/src ./libs/database/src
 COPY libs/database/migrations ./libs/database/migrations
 COPY libs/database/knexfile.js ./libs/database/knexfile.js
+COPY libs/shared/src ./libs/shared/src
 COPY apps/server/src ./apps/server/src
 
 # Build packages in dependency order
 # 1. domain (no dependencies)
 RUN cd libs/domain && npm run build
 
-# 2. backend (depends on domain)
+# 2. contracts (depends on domain)
 RUN cd libs/contracts && npm run build
 
 # 3. database (depends on domain)
 RUN cd libs/database && npm run build
 
-# 4. backend API (depends on all libs)
+# 4. shared (depends on domain)
+RUN cd libs/shared && npm run build
+
+# 5. backend API (depends on all libs)
 RUN cd apps/server && npm run build
 
 # ========================================
@@ -84,6 +90,7 @@ COPY apps/server/package*.json ./apps/server/
 COPY libs/domain/package*.json ./libs/domain/
 COPY libs/contracts/package*.json ./libs/contracts/
 COPY libs/database/package*.json ./libs/database/
+COPY libs/shared/package*.json ./libs/shared/
 
 # Install ONLY production dependencies
 RUN npm ci --omit=dev --legacy-peer-deps && \
@@ -94,6 +101,7 @@ COPY --from=builder /app/apps/server/dist ./apps/server/dist
 COPY --from=builder /app/libs/domain/dist ./libs/domain/dist
 COPY --from=builder /app/libs/contracts/dist ./libs/contracts/dist
 COPY --from=builder /app/libs/database/dist ./libs/database/dist
+COPY --from=builder /app/libs/shared/dist ./libs/shared/dist
 
 # Copy migration files (needed for runtime migrations)
 COPY --from=builder /app/libs/database/migrations ./libs/database/migrations
@@ -124,5 +132,5 @@ ENV NODE_ENV=production \
 # Use dumb-init to handle signals properly
 ENTRYPOINT ["/usr/bin/dumb-init", "--"]
 
-# Run entrypoint script
-CMD ["docker-entrypoint.sh"]
+# Run entrypoint script with app start command
+CMD ["docker-entrypoint.sh", "node", "apps/server/dist/index.js"]

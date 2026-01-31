@@ -45,7 +45,9 @@
     "migrate:rollback": "cd libs/database && npx knex migrate:rollback",
     "seed": "cd libs/database && npx knex seed:run",
     "infra:up": "docker compose -f infra/docker-compose.yml up -d",
-    "infra:down": "docker compose -f infra/docker-compose.yml down"
+    "infra:down": "docker compose -f infra/docker-compose.yml down",
+    "release": "bash scripts/release.sh",
+    "build:docker": "bash scripts/build-docker.sh"
   },
   "devDependencies": {
     "@orangeopensource/hurl": "^7.1.0",
