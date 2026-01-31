@@ -46,6 +46,7 @@ COPY libs/domain/src ./libs/domain/src
 COPY libs/contracts/src ./libs/contracts/src
 COPY libs/database/src ./libs/database/src
 COPY libs/database/migrations ./libs/database/migrations
+COPY libs/database/scripts ./libs/database/scripts
 COPY libs/database/knexfile.js ./libs/database/knexfile.js
 COPY libs/shared/src ./libs/shared/src
 COPY apps/server/src ./apps/server/src
@@ -106,6 +107,7 @@ COPY --from=builder /app/libs/shared/dist ./libs/shared/dist
 # Copy migration files (needed for runtime migrations)
 COPY --from=builder /app/libs/database/migrations ./libs/database/migrations
 COPY --from=builder /app/libs/database/knexfile.js ./libs/database/knexfile.js
+COPY --from=builder /app/libs/database/scripts ./libs/database/scripts
 
 # Copy entrypoint script
 COPY apps/server/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
@@ -122,15 +124,16 @@ EXPOSE 3001
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD node -e "require('http').get('http://localhost:3001/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+    CMD node -e "require('http').get('http://localhost:3001/api/v1/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
 # Set environment defaults
 ENV NODE_ENV=production \
     NODE_MODE=hybrid \
-    API_PORT=3001
+    API_PORT=3001 \
+    CACHE_BUST=2025-01-30-v6
 
 # Use dumb-init to handle signals properly
 ENTRYPOINT ["/usr/bin/dumb-init", "--"]
 
 # Run entrypoint script with app start command
-CMD ["docker-entrypoint.sh", "node", "apps/server/dist/index.js"]
+CMD ["/usr/local/bin/docker-entrypoint.sh", "node", "apps/server/dist/main.js"]
